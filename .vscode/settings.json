@@ -1,0 +1,11 @@
+{
+    "sqltools.connections": [
+        {
+            "previewLimit": 50,
+            "driver": "SQLite",
+            "name": "mealsql",
+            "database": "mealsql.db"
+        }
+    ],
+    "sqltools.useNodeRuntime": true
+}
