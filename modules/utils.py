@@ -57,7 +57,7 @@ class MealUtils:
         sheet.update_value("G2", "無")
         sheet.update_values("D2", [[f"=XLOOKUP(C{i},H:H,I:I,\"\")", f"=IF(C{i}=\"\",\"\",IF(D{i}>B1,D{i}-B1,0))"] for i in range(2, 101)])
         sheet.update_values("J2", [[f"=IF(H{i}=\"\",\"\",COUNTIF(C2:C100,H{i}))", f"=IF(H{i}=\"\",\"\",I{i}*J{i})"] for i in range(2, 101)])
-        sheet.update_valuea("L1", [["總金額"], ["=SUM(K2:K100)"], ["自付"], ["=SUM(E2:E100)"], ["報帳"], ["=L2-L4"]])
+        sheet.update_values("L1", [["總金額"], ["=SUM(K2:K100)"], ["自付"], ["=SUM(E2:E100)"], ["報帳"], ["=L2-L4"]])
         sheet.update_values("A2", [[members[i][2]] for i in range(len(members))])
         sheet.update_values("B2", [[members[i][1]] for i in range(len(members))])
 
