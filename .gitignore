@@ -4,6 +4,9 @@ gcp.json
 saves.json
 mealsql.db
 
+# testing files
+test.*
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
