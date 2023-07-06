@@ -28,12 +28,12 @@ class MealUtils:
     def close(self) -> None:
         self._connection.close()
 
-    def members_add(self, id: int, name: str, group: str) -> None:
+    def member_add(self, id: int, name: str, group: str) -> None:
         self._cursor.execute(
-            f""" INSERT INTO `members` (`id`, `name`, `group`) VALUES ({id}, "{name}", "{group}") """)
+            f""" REPLACE INTO `members` (`id`, `name`, `group`) VALUES ({id}, "{name}", "{group}") """)
         self._connection.commit()
 
-    def members_remove(self, id: int) -> None:
+    def member_remove(self, id: int) -> None:
         self._cursor.execute(
             f""" DELETE FROM `members` WHERE `id` = {id} """)
         self._connection.commit()
@@ -43,7 +43,7 @@ class MealUtils:
             f""" SELECT * FROM `members` WHERE `id` = {id} """)
         return self._cursor.fetchone()
 
-    def members_list(self) -> list:
+    def member_list(self) -> list:
         self._cursor.execute(
             f""" SELECT * FROM `members` ORDER BY `group` """)
         return self._cursor.fetchall()
@@ -51,14 +51,13 @@ class MealUtils:
     def meal_create(self, title: str) -> None:
         self._spreadsheets.add_worksheet(title, index=0)
         sheet: Worksheet = self._spreadsheets.worksheet_by_title(title)
-        self._cursor.execute(
-            f""" SELECT * FROM `members` """)
-        members = self._cursor.fetchall()
+        members = self.member_list()
 
-        sheet.update_values("A1", [["本日補助", 0, "餐點", "價格", "自付", "已交錢", "店家", "品項", "價格", "數量", "小計", "總金額"]])
+        sheet.update_values("A1", [["本日補助", 0, "餐點", "價格", "自付", "已交錢", "店家", "品項", "價格", "數量", "小計"]])
+        sheet.update_value("G2", "無")
         sheet.update_values("D2", [[f"=XLOOKUP(C{i},H:H,I:I,\"\")", f"=IF(C{i}=\"\",\"\",IF(D{i}>B1,D{i}-B1,0))"] for i in range(2, 101)])
         sheet.update_values("J2", [[f"=IF(H{i}=\"\",\"\",COUNTIF(C2:C100,H{i}))", f"=IF(H{i}=\"\",\"\",I{i}*J{i})"] for i in range(2, 101)])
-        sheet.update_value("L2", "=SUM(K2:K100)")
+        sheet.update_valuea("L1", [["總金額"], ["=SUM(K2:K100)"], ["自付"], ["=SUM(E2:E100)"], ["報帳"], ["=L2-L4"]])
         sheet.update_values("A2", [[members[i][2]] for i in range(len(members))])
         sheet.update_values("B2", [[members[i][1]] for i in range(len(members))])
 

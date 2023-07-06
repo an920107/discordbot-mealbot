@@ -29,7 +29,7 @@ async def member(ctx: commands.context.Context, *args: str):
         if args[0] == "add":
             if len(args) == 4:
                 try:
-                    mu.members_add(int(args[1]), args[2], args[3])
+                    mu.member_add(int(args[1]), args[2], args[3])
                     await ctx.send(f"<@{args[1]}> has been added to {args[3]} as {args[2]}.")
                 except ValueError:
                     await ctx.send("`<id>` should be an integer.")
@@ -40,7 +40,7 @@ async def member(ctx: commands.context.Context, *args: str):
         elif args[0] == "remove":
             if len(args) == 2:
                 try:
-                    mu.members_remove(int(args[1]))
+                    mu.member_remove(int(args[1]))
                     await ctx.send(f"<@{args[1]}> has been removed.")
                 except ValueError:
                     await ctx.send("`<id>` should be an integer.")
@@ -60,7 +60,7 @@ async def member(ctx: commands.context.Context, *args: str):
                 await ctx.send("Usage: `!member query <id>`")
         elif args[0] == "list":
             if len(args) == 1:
-                await ctx.send(f"{mu.members_list()}")
+                await ctx.send(f"{mu.member_list()}")
             else:
                 await ctx.send("Usage: `!member list`")
 
@@ -145,16 +145,19 @@ async def meal(ctx: commands.context.Context, *args: str):
                 await ctx.send("Usage: `!meal delete <title> <item>`")
         elif args[0] == "order":
             if len(args) == 2:
-                items = mu.meal_query(args[1])
-                for i in range(len(items)):
-                    items[i].insert(0, emojis[i])
-                msg = await ctx.send(
-                    f"`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`\n```\n" +
-                    "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items)) + "\n```")
-                mu.lastest_msg_id(msg.id)
-                mu.lastest_meal_title(args[1])
-                for i in range(len(items)):
-                    await msg.add_reaction(emojis[i])
+                try:
+                    items = mu.meal_query(args[1])
+                    for i in range(len(items)):
+                        items[i].insert(0, emojis[i])
+                    msg = await ctx.send(
+                        f"`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`\n```\n" +
+                        "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items)) + "\n```")
+                    mu.lastest_msg_id(msg.id)
+                    mu.lastest_meal_title(args[1])
+                    for i in range(len(items)):
+                        await msg.add_reaction(emojis[i])
+                except:
+                    await ctx.send(f"Meal title `{args[1]}` is not exist.")
             else:
                 await ctx.send("Usage: `!meal order <title>`")
 
