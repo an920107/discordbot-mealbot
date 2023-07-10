@@ -150,7 +150,7 @@ async def meal(ctx: commands.context.Context, *args: str):
                     for i in range(len(items)):
                         items[i].insert(0, emojis[i])
                     msg = await ctx.send(
-                        f"`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`\n```\n" +
+                        f"@everyone\n`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`\n```\n" +
                         "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items)) + "\n```")
                     mu.lastest_msg_id(msg.id)
                     mu.lastest_meal_title(args[1])
