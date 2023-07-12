@@ -43,6 +43,12 @@ class MealUtils:
             f""" SELECT * FROM `members` WHERE `id` = {id} """)
         return self._cursor.fetchone()
 
+    def member_search(self, keyword: str) -> list:
+        self._cursor.execute(
+            f""" SELECT `id` FROM `members` WHERE `name` LIKE "%{keyword}%" OR `group` LIKE "%{keyword}%" """)
+        result = self._cursor.fetchall()
+        return list(map(lambda x: x[0], result))
+
     def member_list(self) -> list:
         self._cursor.execute(
             f""" SELECT * FROM `members` ORDER BY `group` """)
@@ -103,6 +109,13 @@ class MealUtils:
             return sheet.get_value("G2")
         sheet.update_value("G2", store)
 
+    def meal_state(self, title: str) -> list[list]:
+        sheet: Worksheet = self._spreadsheets.worksheet_by_title(title)
+        records = sheet.get_values("B2", "C100")
+        if records[0][0] == "":
+            records = []
+        return records
+
     def order_update(self, title: str, user_id: int, item: str) -> None:
         sheet: Worksheet = self._spreadsheets.worksheet_by_title(title)
         sheet_users = list(map(lambda x: x[0], sheet.get_values("B2", "B100")))
@@ -124,4 +137,3 @@ class MealUtils:
             return self._saves["meal_title"]
         self._saves["meal_title"] = title
         self._dump_saves()
-

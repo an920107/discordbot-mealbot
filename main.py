@@ -68,7 +68,7 @@ async def member(ctx: commands.context.Context, *args: str):
 @bot.command()
 async def meal(ctx: commands.context.Context, *args: str):
     if len(args) == 0:
-        await ctx.send("Usage: `!meal <create | discount | store | add | delete | query | list> [args]`")
+        await ctx.send("Usage: `!meal <create | discount | store | add | delete | query | list | notify> [args]`")
     else:
         if args[0] == "create":
             if len(args) == 2:
@@ -160,6 +160,28 @@ async def meal(ctx: commands.context.Context, *args: str):
                     await ctx.send(f"Meal title `{args[1]}` is not exist.")
             else:
                 await ctx.send("Usage: `!meal order <title>`")
+        elif args[0] == "notify":
+            if len(args) == 2:
+                try:
+                    to_notify = []
+                    records = mu.meal_state(args[1])
+                    for record in records:
+                        if record[1] == "":
+                            to_notify.append(f"<@{mu.member_search(record[0])[0]}>")
+                    await ctx.send(f"{' '.join(to_notify)} 還沒點餐喔！")
+                except:
+                    await ctx.send(f"Meal title `{args[1]}` is not exist.")
+            else:
+                await ctx.send("Usage: `!meal notify <title>`")
+        elif args[0] == "state":
+            if len(args) == 2:
+                try:
+                    await ctx.send(str(mu.meal_state(args[1])))
+                except:
+                    await ctx.send(f"Meal title `{args[1]}` is not exist.")
+            else:
+                await ctx.send("Usage: `!meal state <title>`")
+
 
 
 @bot.event
