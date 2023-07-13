@@ -149,14 +149,18 @@ async def meal(ctx: commands.context.Context, *args: str):
                     items = mu.meal_query(args[1])
                     for i in range(len(items)):
                         items[i].insert(0, emojis[i])
-                    msg = await ctx.send(
-                        f"@everyone\n`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`\n```\n" +
-                        "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items)) + "\n```")
-                    mu.lastest_msg_id(msg.id)
+                    await ctx.send(
+                        f"@everyone\n`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`")
+                    msgs = []
+                    for i in range(len(items) // 20 + 1):
+                        msgs.append(await ctx.send(
+                            "```\n" + "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items[i * 20 : i * 20 + 20])) + "\n```"))
+                    # mu.lastest_msg_id(msgs[0].id)
                     mu.lastest_meal_title(args[1])
                     for i in range(len(items)):
-                        await msg.add_reaction(emojis[i])
-                except:
+                        await msgs[i // 20].add_reaction(emojis[i])
+                except Exception as e:
+                    await ctx.send(e)
                     await ctx.send(f"Meal title `{args[1]}` is not exist.")
             else:
                 await ctx.send("Usage: `!meal order <title>`")
@@ -187,7 +191,9 @@ async def meal(ctx: commands.context.Context, *args: str):
 @bot.event
 async def on_reaction_add(reaction: discord.reaction.Reaction, user: discord.member.Member):
     msg = reaction.message
-    if user.bot or (msg.id != mu.lastest_msg_id()):
+    # if user.bot or (msg.id != mu.lastest_msg_id()):
+    #     return
+    if user.bot:
         return
     try:
         title = mu.lastest_meal_title()
