@@ -7,6 +7,8 @@ bot = commands.Bot(intents=discord.Intents.all(), command_prefix="!")
 
 mu = modules.utils.MealUtils()
 emojis: list = json.load(open("emojis.json", "r", encoding="utf-8"))
+cancel_emoji = "❌"
+
 
 @bot.event
 async def on_ready():
@@ -149,16 +151,19 @@ async def meal(ctx: commands.context.Context, *args: str):
                     items = mu.meal_query(args[1])
                     for i in range(len(items)):
                         items[i].insert(0, emojis[i])
+                    items.append([cancel_emoji, "取消", "-"])
                     await ctx.send(
                         f"@everyone\n`{args[1]}` `{mu.meal_store(args[1])}` `本日補助：{mu.meal_discount(args[1])}`")
-                    msgs = []
+                    msgs: list[discord.message.Message] = []
                     for i in range(len(items) // 20 + 1):
                         msgs.append(await ctx.send(
-                            "```\n" + "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items[i * 20 : i * 20 + 20])) + "\n```"))
+                            "```\n" + "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items[i * 20: i * 20 + 20])) + "\n```"))
                     # mu.lastest_msg_id(msgs[0].id)
                     mu.lastest_meal_title(args[1])
-                    for i in range(len(items)):
+                    for i in range(len(items) - 1):
                         await msgs[i // 20].add_reaction(emojis[i])
+                    i += 1
+                    await msgs[i // 20].add_reaction(cancel_emoji)
                 except Exception as e:
                     await ctx.send(e)
                     await ctx.send(f"Meal title `{args[1]}` is not exist.")
@@ -171,7 +176,8 @@ async def meal(ctx: commands.context.Context, *args: str):
                     records = mu.meal_state(args[1])
                     for record in records:
                         if record[1] == "":
-                            to_notify.append(f"<@{mu.member_search(record[0])[0]}>")
+                            to_notify.append(
+                                f"<@{mu.member_search(record[0])[0]}>")
                     await ctx.send(f"{' '.join(to_notify)} 還沒點餐喔！")
                 except:
                     await ctx.send(f"Meal title `{args[1]}` is not exist.")
@@ -187,7 +193,6 @@ async def meal(ctx: commands.context.Context, *args: str):
                 await ctx.send("Usage: `!meal state <title>`")
 
 
-
 @bot.event
 async def on_reaction_add(reaction: discord.reaction.Reaction, user: discord.member.Member):
     msg = reaction.message
@@ -197,13 +202,17 @@ async def on_reaction_add(reaction: discord.reaction.Reaction, user: discord.mem
         return
     try:
         title = mu.lastest_meal_title()
-        items = mu.meal_query(title)
-        index = emojis.index(reaction.emoji)
-        mu.order_update(title, user.id, items[index][0])
-        await msg.channel.send(f"<@{user.id}> has ordered `{items[index][0]}`.")
-    except Exception as e:
-        print(e.with_traceback())
-    
+        if reaction.emoji == cancel_emoji:
+            mu.order_update(title, user.id, "")
+            await msg.channel.send(f"<@{user.id}>'s order has been canceled.")
+        else:
+            items = mu.meal_query(title)
+            index = emojis.index(reaction.emoji)
+            mu.order_update(title, user.id, items[index][0])
+            await msg.channel.send(f"<@{user.id}> has ordered `{items[index][0]}`.")
+    except:
+        await msg.channel.send(f"<@{user.id}> has added the reaction '{reaction.emoji}'. However '{reaction.emoji}' isn't the order option.")
+
 
 @bot.command()
 async def test(ctx: commands.context.Context, *args: str):
