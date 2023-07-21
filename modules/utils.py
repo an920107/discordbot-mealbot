@@ -124,11 +124,11 @@ class MealUtils:
         index = sheet_users.index(self._cursor.fetchone()[0])
         sheet.update_value(f"C{index + 2}", item)
 
-    def lastest_msg_id(self, id: int | None = None) -> int | None:
+    def lastest_msg_id(self, ids: list[int] | None = None) -> list[int] | None:
         self._load_saves()
-        if id == None:
+        if ids == None:
             return self._saves["msg_id"]
-        self._saves["msg_id"] = id
+        self._saves["msg_id"] = ids
         self._dump_saves()
 
     def lastest_meal_title(self, title: str | None = None) -> int | None:

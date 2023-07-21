@@ -158,7 +158,8 @@ async def meal(ctx: commands.context.Context, *args: str):
                     for i in range(len(items) // 20 + 1):
                         msgs.append(await ctx.send(
                             "```\n" + "\n".join(map(lambda x: f"{x[0]} {x[2]:3s} {x[1]}", items[i * 20: i * 20 + 20])) + "\n```"))
-                    # mu.lastest_msg_id(msgs[0].id)
+                    msg_ids = list(map(lambda x: x.id, msgs))
+                    mu.lastest_msg_id(msg_ids)
                     mu.lastest_meal_title(args[1])
                     for i in range(len(items) - 1):
                         await msgs[i // 20].add_reaction(emojis[i])
@@ -196,8 +197,8 @@ async def meal(ctx: commands.context.Context, *args: str):
 @bot.event
 async def on_reaction_add(reaction: discord.reaction.Reaction, user: discord.member.Member):
     msg = reaction.message
-    # if user.bot or (msg.id != mu.lastest_msg_id()):
-    #     return
+    if user.bot or (msg.id not in mu.lastest_msg_id()):
+        return
     if user.bot:
         return
     try:
